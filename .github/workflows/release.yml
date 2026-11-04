@@ -1,0 +1,132 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "要发布的 tag（必须已存在，例如 v0.1.0）"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.event.inputs.tag || github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Build, verify and publish
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.tag || github.ref }}
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Resolve version and tag
+        id: meta
+        run: |
+          tag="${{ github.event.inputs.tag || github.ref_name }}"
+          version="$(node --input-type=commonjs -e "process.stdout.write(JSON.parse(require('fs').readFileSync('plugin.json','utf8')).version)")"
+          if [ "$tag" != "v$version" ]; then
+            echo "::error::tag '$tag' does not match plugin.json version '$version' (expected 'v$version')"
+            exit 1
+          fi
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "Releasing $tag (plugin.json version $version)"
+
+      - name: Typecheck, test and build
+        run: npm run check
+
+      - name: Verify committed dist is up to date
+        run: |
+          if ! git diff --quiet -- dist; then
+            echo "::error::dist/index.js is out of date — run \`npm run build\` and commit the result"
+            git diff --stat -- dist
+            exit 1
+          fi
+
+      - name: Package offline installer
+        run: npm run package
+
+      - name: Collect artifacts
+        id: pkg
+        run: |
+          shopt -s nullglob
+          files=(release/*.zip release/*.sha256)
+          if [ "${#files[@]}" -eq 0 ]; then
+            echo "::error::no artifacts produced in release/"
+            exit 1
+          fi
+          printf 'files=%s\n' "${files[*]}" >> "$GITHUB_OUTPUT"
+          echo "sha256=$(tr -d '\n' < release/*.zip.sha256)" >> "$GITHUB_OUTPUT"
+          ls -l "${files[@]}"
+
+      - name: Compose release notes
+        env:
+          TAG: ${{ steps.meta.outputs.tag }}
+          VERSION: ${{ steps.meta.outputs.version }}
+          SHA256: ${{ steps.pkg.outputs.sha256 }}
+        run: |
+          cat > notes.md <<EOF
+          QwenPaw 极简界面 **$TAG**（\`plugin.json\` version \`$VERSION\`）。
+
+          只保留侧边栏的会话历史，隐藏对话框中的 Loop 模式、项目目录和审批控件，并强制工具审批为 \`OFF\`。
+
+          ## 安装
+
+          要求 QwenPaw \`2.2.2\` – \`2.9.9\`。下载下方的 \`qwenpaw-simplistic-$VERSION.zip\`，然后：
+
+          \`\`\`bash
+          qwenpaw plugin install ./qwenpaw-simplistic-$VERSION.zip
+          \`\`\`
+
+          安装后重新加载控制台页面（必要时重启 QwenPaw）。校验和：
+
+          \`\`\`
+          $SHA256
+          \`\`\`
+
+          完整说明见 [README](https://github.com/${GITHUB_REPOSITORY}#readme)。
+          EOF
+          cat notes.md
+
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ steps.meta.outputs.tag }}
+          FILES: ${{ steps.pkg.outputs.files }}
+        run: |
+          set -euo pipefail
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" $FILES --clobber
+            gh release edit "$TAG" --title "$TAG" --notes-file notes.md
+          else
+            gh release create "$TAG" $FILES \
+              --title "$TAG" \
+              --notes-file notes.md \
+              --verify-tag
+          fi
+
+      - name: Summary
+        env:
+          TAG: ${{ steps.meta.outputs.tag }}
+        run: |
+          echo "### Released $TAG" >> "$GITHUB_STEP_SUMMARY"
+          echo "https://github.com/${GITHUB_REPOSITORY}/releases/tag/$TAG" >> "$GITHUB_STEP_SUMMARY"

@@ -69,6 +69,22 @@ npm run build   # 仅构建 dist/index.js
 2. 给 `Storage.prototype.getItem` 加一层前缀判断，让 `approval_level-*` 恒为 `OFF`。
 3. 包装 `window.fetch`，把发往 `/console/chat` 的 `request_context.approval_level` 改写为 `OFF`。
 
+## 发布
+
+发布由 GitHub Actions 自动完成：[`.github/workflows/release.yml`](.github/workflows/release.yml)。
+
+1. 更新 `plugin.json` 与 `package.json` 的 `version`，跑一次 `npm run build` 并提交 `dist/`（CI 会校验已提交的 `dist/` 与重新构建的结果一致）。
+2. 打 tag 并推送，tag 必须与 `plugin.json` 的版本一致（`v` + 版本号）：
+
+```bash
+V=0.1.0
+git tag "v$V" && git push origin "v$V"
+```
+
+3. Workflow 会执行 `npm run check`（类型检查 + 测试 + 构建）、`npm run package` 打包 zip 与 sha256，然后以该 tag 创建 GitHub Release 并附上下载产物；若 Release 已存在则覆盖上传。
+
+也可以在 Actions 页面手动触发 `Release`（`workflow_dispatch`），填入一个已存在的 tag。
+
 ## 实现说明与限制
 
 - 控制台没有提供「隐藏侧边栏区块 / 发件箱控件」的公开 API，因此布局使用 CSS 属性选择器匹配控制台的 CSS Module **局部类名**（如 `index-module__sessionArea__`、`ApprovalToggle-module__trigger__`），不使用会随构建变化的 hash。
