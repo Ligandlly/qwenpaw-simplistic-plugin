@@ -1,0 +1,26 @@
+{
+  "id": "qwenpaw-simplistic",
+  "name": {
+    "zh-CN": "QwenPaw 极简界面",
+    "en-US": "QwenPaw Simplistic UI"
+  },
+  "version": "0.1.0",
+  "type": "frontend",
+  "description": "只保留侧边栏的会话历史，隐藏对话框中的 Loop 模式、项目目录和审批控件，并强制工具审批为 OFF。",
+  "description_i18n": {
+    "zh-CN": "只保留侧边栏的会话历史，隐藏对话框中的 Loop 模式、项目目录和审批控件，并强制工具审批为 OFF。",
+    "en-US": "Keep only conversation history in the sidebar, hide the Loop mode, project directory and approval controls in the composer, and force tool approval to OFF."
+  },
+  "author": "QwenPaw Community",
+  "entry": {
+    "frontend": "dist/index.js"
+  },
+  "qwenpaw_version": {
+    "min": "2.2.2",
+    "max": "2.9.9"
+  },
+  "meta": {
+    "category": "productivity",
+    "icon": "🪶"
+  }
+}
