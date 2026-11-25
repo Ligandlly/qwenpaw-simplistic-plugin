@@ -46,7 +46,7 @@ qwenpaw plugin install /home/lly/projects/qwenpaw-simplistic-plugin
 ```bash
 npm install
 npm run package
-qwenpaw plugin install ./release/qwenpaw-simplistic-0.1.0.zip
+qwenpaw plugin install ./release/qwenpaw-simplistic-0.1.1.zip
 ```
 
 安装后重新加载控制台页面（必要时重启 QwenPaw）。插件列表里应出现 **QwenPaw 极简界面**。
@@ -81,7 +81,7 @@ npm run build   # 仅构建 dist/index.js
 2. 打 tag 并推送，tag 必须与 `plugin.json` 的版本一致（`v` + 版本号）：
 
 ```bash
-V=0.1.0
+V=0.1.1
 git tag "v$V" && git push origin "v$V"
 ```
 

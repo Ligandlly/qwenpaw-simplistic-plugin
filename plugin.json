@@ -4,7 +4,7 @@
     "zh-CN": "QwenPaw 极简界面",
     "en-US": "QwenPaw Simplistic UI"
   },
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "frontend",
   "description": "只保留侧边栏的会话历史，隐藏对话框中的 Loop 模式、项目目录和审批控件，并强制工具审批为 OFF。",
   "description_i18n": {
