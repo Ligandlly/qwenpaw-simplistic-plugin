@@ -42,6 +42,16 @@ const CSS = `
 [class*="HarnessApprovalToggle-module__trigger__"] {
   display: none !important;
 }
+
+/* ── Empty conversation: drop the welcome hero ─────────────────────────
+   A new conversation renders the greeting, the sample prompts and the
+   "start a new journey" cards inside the message list. Hide the whole
+   welcome variant of the list so no empty gap is left behind; the plain
+   .qwenpaw-chat-anywhere-message-list (real messages) is untouched. */
+.qwenpaw-chat-anywhere-message-list-welcome,
+[class*="ChatWelcome-module__welcome__"] {
+  display: none !important;
+}
 `;
 
 export function injectStyles(doc: Document = document): void {
