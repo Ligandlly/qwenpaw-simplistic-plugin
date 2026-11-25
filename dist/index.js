@@ -35,10 +35,13 @@
 
 /* \u2500\u2500 Empty conversation: drop the welcome hero \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
    A new conversation renders the greeting, the sample prompts and the
-   "start a new journey" cards inside the message list. Hide the whole
-   welcome variant of the list so no empty gap is left behind; the plain
+   "start a new journey" cards inside a flex child
+   .qwenpaw-chat-anywhere-message-list-welcome. That child is the spacer
+   between the header and the composer (flex: 1; height: 100%); hiding it
+   with display:none pulls the input to the top. Hide only its content, so
+   the container keeps reserving the space and the plain
    .qwenpaw-chat-anywhere-message-list (real messages) is untouched. */
-.qwenpaw-chat-anywhere-message-list-welcome,
+.qwenpaw-chat-anywhere-message-list-welcome > *,
 [class*="ChatWelcome-module__welcome__"] {
   display: none !important;
 }

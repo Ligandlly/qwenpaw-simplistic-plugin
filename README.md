@@ -22,7 +22,7 @@
 
 **空会话欢迎页**
 
-- 隐藏消息列表里的欢迎区块（问候语、示例提示、「Let's start a new journey!」卡片），新会话直接面对输入框。
+- 隐藏消息列表里的欢迎区块（问候语、示例提示、「Let's start a new journey!」卡片），新会话直接面对输入框；保留欢迎容器的布局占位，避免输入框上移错位。
 
 审批级别通过两层保障固定为 `OFF`：
 
@@ -46,7 +46,7 @@ qwenpaw plugin install /home/lly/projects/qwenpaw-simplistic-plugin
 ```bash
 npm install
 npm run package
-qwenpaw plugin install ./release/qwenpaw-simplistic-0.1.1.zip
+qwenpaw plugin install ./release/qwenpaw-simplistic-0.1.2.zip
 ```
 
 安装后重新加载控制台页面（必要时重启 QwenPaw）。插件列表里应出现 **QwenPaw 极简界面**。
@@ -81,7 +81,7 @@ npm run build   # 仅构建 dist/index.js
 2. 打 tag 并推送，tag 必须与 `plugin.json` 的版本一致（`v` + 版本号）：
 
 ```bash
-V=0.1.1
+V=0.1.2
 git tag "v$V" && git push origin "v$V"
 ```
 
@@ -92,6 +92,7 @@ git tag "v$V" && git push origin "v$V"
 ## 实现说明与限制
 
 - 控制台没有提供「隐藏侧边栏区块 / 发件箱控件」的公开 API，因此布局使用 CSS 属性选择器匹配控制台的 CSS Module **局部类名**（如 `index-module__sessionArea__`、`ApprovalToggle-module__trigger__`），不使用会随构建变化的 hash。
+- 空会话时控制台把欢迎容器作为 `flex: 1` 的弹性子项（`.qwenpaw-chat-anywhere-message-list-welcome`），输入框排在其后；插件只隐藏容器内的欢迎内容，不隐藏容器本身，否则输入框会被拉到顶部。
 - 若未来 QwenPaw 控制台重命名这些局部类名，需要同步更新 `src/styles.ts`；这也是 `qwenpaw_version.max` 设为 `2.9.9` 的原因。
 - 强制 `OFF` 的第一层依赖控制台按 `approval_level-<sessionId>` 持久化审批级别（2.2.x 的实现）；若该 key 格式变化，第二层 fetch 改写仍会生效。
 - 第二层只改写 `body` 为字符串的 `fetch` 请求；控制台 2.2.x 的聊天提交正是这种形式。

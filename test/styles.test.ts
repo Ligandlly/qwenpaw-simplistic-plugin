@@ -41,11 +41,16 @@ describe("styles", () => {
     expect(sheet).toContain('class*="ApprovalToggle-module__trigger__"');
   });
 
-  it("hides the empty-conversation welcome hero", () => {
+  it("hides the welcome hero content but keeps its layout box", () => {
     injectStyles();
     const sheet = css();
-    expect(sheet).toContain(".qwenpaw-chat-anywhere-message-list-welcome");
+    expect(sheet).toContain(
+      ".qwenpaw-chat-anywhere-message-list-welcome > *",
+    );
     expect(sheet).toContain('class*="ChatWelcome-module__welcome__"');
+    expect(sheet).not.toContain(
+      ".qwenpaw-chat-anywhere-message-list-welcome,\n",
+    );
   });
 
   it("removes the style element", () => {

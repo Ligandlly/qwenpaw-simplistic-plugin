@@ -54,6 +54,26 @@ describe("simplified layout", () => {
     }
   });
 
+  it("keeps the empty-conversation flex spacer while hiding the welcome content", () => {
+    document.body.insertAdjacentHTML(
+      "beforeend",
+      `
+      <div class="qwenpaw-chat-anywhere-chat">
+        <div id="welcome-list" class="qwenpaw-chat-anywhere-message-list qwenpaw-chat-anywhere-message-list-welcome">
+          <section id="welcome-content" class="ChatWelcome-module__welcome__q7">
+            greeting
+          </section>
+        </div>
+        <div id="composer" class="qwenpaw-chat-anywhere-input">input</div>
+      </div>
+      `,
+    );
+
+    expect(display("welcome-list")).not.toBe("none");
+    expect(display("welcome-content")).toBe("none");
+    expect(display("composer")).not.toBe("none");
+  });
+
   it("leaves only the new-task and history launchers on a collapsed rail", () => {
     document.body.insertAdjacentHTML(
       "beforeend",
